@@ -1,0 +1,55 @@
+version: "3.8"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# RetireVision — Unraid Production Compose
+#
+# Volume paths follow Unraid convention: /mnt/user/appdata/<appname>/
+# Change UNRAID_APPDATA below if your appdata share is elsewhere.
+#
+# Usage (Unraid Compose Manager):
+#   1. Copy this file to /mnt/user/appdata/retirevision/docker-compose.yml
+#   2. Pull or load the images (see deploy/ scripts)
+#   3. Start via Compose Manager or: docker compose up -d
+# ─────────────────────────────────────────────────────────────────────────────
+
+services:
+
+  # ── API / Calculation Engine ─────────────────────────────────────────────
+  retirevision-backend:
+    image: ${DOCKER_REGISTRY:-retirevision}/retirevision-backend:${TAG:-latest}
+    container_name: retirevision-backend
+    restart: unless-stopped
+    networks:
+      - retirevision
+    volumes:
+      # SQLite database — persists across container rebuilds
+      - ${APPDATA_PATH:-/mnt/user/appdata/retirevision}/db:/data
+      # CSV uploads / import history
+      - ${APPDATA_PATH:-/mnt/user/appdata/retirevision}/uploads:/uploads
+    environment:
+      DATABASE_URL: sqlite:////data/retire.db
+      UPLOAD_DIR: /uploads
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 15s
+
+  # ── Frontend / nginx ─────────────────────────────────────────────────────
+  retirevision-frontend:
+    image: ${DOCKER_REGISTRY:-retirevision}/retirevision-frontend:${TAG:-latest}
+    container_name: retirevision-frontend
+    restart: unless-stopped
+    networks:
+      - retirevision
+    ports:
+      - "${FRONTEND_PORT:-7410}:80"
+    depends_on:
+      retirevision-backend:
+        condition: service_healthy
+
+networks:
+  retirevision:
+    name: retirevision
+    driver: bridge

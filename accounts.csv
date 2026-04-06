@@ -1,0 +1,7 @@
+account_id,scenario_name,account_name,account_type,tax_treatment,institution,owner,current_balance,annual_contribution,employer_match_percent,expected_annual_return_percent,dividend_yield_percent,contribution_stop_age,withdrawal_priority,include_in_projection,spend_dividends_in_retirement,starting_monthly_income,income_start_age,income_end_age,cola_percent,notes
+ACC-001,Base Case,Work 401k,401k,tax_deferred,Employer Plan,self,292396,21000,8,7,0,60,3,TRUE,FALSE,,,,,Traditional pre-tax retirement account
+ACC-002,Base Case,Roth IRA,roth_ira,tax_free,Brokerage Firm,self,15000,7500,0,7,0.5,60,4,TRUE,FALSE,,,,,Tax-free qualified withdrawals
+ACC-003,Base Case,Dividend Portfolio,taxable_brokerage,taxable,Brokerage Firm,self,5000,3600,0,6,3.2,60,2,TRUE,TRUE,,,,,Taxable account focused on dividend income
+ACC-004,Base Case,Pension,pension,taxable,Employer Pension,self,0,0,0,0,0,,1,TRUE,FALSE,2500,60,,2,Monthly pension benefit begins at retirement
+ACC-005,Base Case,Social Security,social_security,partially_taxable,SSA,self,0,0,0,0,0,,1,TRUE,FALSE,3200,67,,2,Estimated monthly Social Security benefit
+ACC-006,Base Case,Cash Reserve / HYSA,cash_hysa,taxable,Bank,joint,25000,0,0,3.5,0,,1,TRUE,FALSE,,,,,Emergency fund and short-term reserve

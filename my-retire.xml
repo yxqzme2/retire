@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<Container version="2">
+  <Name>RetireVision</Name>
+  <Repository>ghcr.io/yxqzme2/retire:latest</Repository>
+  <Registry>https://ghcr.io</Registry>
+  <Network>bridge</Network>
+  <Shell>sh</Shell>
+  <Privileged>false</Privileged>
+  <Overview>Personal retirement planning dashboard. Year-by-year projections, multiple scenarios, tax modeling, 6 chart types, and CSV import/export. All data stays local.</Overview>
+  <Category>Tools: Finance</Category>
+  <WebUI>http://[IP]:[PORT:7410]/</WebUI>
+  <Icon>https://raw.githubusercontent.com/yxqzme2/retire/main/frontend/public/icon.svg</Icon>
+  <ExtraParams>--restart=unless-stopped</ExtraParams>
+  <PostArgs/>
+  <CPUset/>
+  <DonateText/>
+  <DonateLink/>
+
+  <!-- Web port -->
+  <Config
+    Name="Web UI Port"
+    Target="80"
+    Default="7410"
+    Mode="tcp"
+    Description="Port to access the RetireVision dashboard in your browser."
+    Type="Port"
+    Display="always"
+    Required="true"
+    Mask="false">7410</Config>
+
+  <!-- Persistent database volume -->
+  <Config
+    Name="Database"
+    Target="/data"
+    Default="/mnt/user/appdata/retirevision/db"
+    Mode="rw"
+    Description="Stores the SQLite database with all your profiles, scenarios, and projections. Back this folder up."
+    Type="Path"
+    Display="always"
+    Required="true"
+    Mask="false">/mnt/user/appdata/retirevision/db</Config>
+
+  <!-- CSV upload staging area -->
+  <Config
+    Name="Uploads"
+    Target="/uploads"
+    Default="/mnt/user/appdata/retirevision/uploads"
+    Mode="rw"
+    Description="Temporary storage for CSV imports. Can be the same parent folder as the database."
+    Type="Path"
+    Display="always"
+    Required="true"
+    Mask="false">/mnt/user/appdata/retirevision/uploads</Config>
+
+</Container>
