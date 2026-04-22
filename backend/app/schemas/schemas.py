@@ -325,6 +325,7 @@ class ScenarioSummary(BaseModel):
     is_base_case: bool
     status: str
     profile_id: int
+    last_projected_at: Optional[datetime] = None
     created_at: datetime
     updated_at: Optional[datetime] = None
 

@@ -92,6 +92,47 @@ def _bucket_balances(accounts: list, account_balances: dict) -> tuple:
     return roth, pretax, taxable, cash
 
 
+@dataclass
+class _SyntheticStream:
+    """Lightweight stand-in for an IncomeStream ORM object."""
+    stream_type: str
+    start_age: int
+    end_age: Optional[int]
+    annual_amount: float   # already annualised
+    cola_percent: float
+
+
+def _build_synthetic_income(accounts: list, income_streams: list) -> list:
+    """
+    For pension / social_security accounts that carry starting_monthly_income
+    and income_start_age, create a synthetic income stream — but ONLY when no
+    explicit IncomeStream with the same name already exists (avoids double-
+    counting when the user has entered both an account and an income stream).
+    """
+    existing_names = {s.name.lower().strip() for s in income_streams}
+    synthetic = []
+    for account in accounts:
+        if not account.include_in_projection:
+            continue
+        if account.account_type not in ("pension", "social_security"):
+            continue
+        if not account.starting_monthly_income or not account.income_start_age:
+            continue
+        # Skip if user already has an explicit stream with the same name
+        if account.name.lower().strip() in existing_names:
+            continue
+        synthetic.append(
+            _SyntheticStream(
+                stream_type=account.account_type,
+                start_age=account.income_start_age,
+                end_age=account.income_end_age,
+                annual_amount=account.starting_monthly_income * 12,
+                cola_percent=account.cola_percent,
+            )
+        )
+    return synthetic
+
+
 def run_projection(
     profile,
     accounts: list,
@@ -122,7 +163,12 @@ def run_projection(
         a.id: a.current_balance for a in accounts if a.include_in_projection
     }
 
-    annual_return_pct = get_return_rate(assumptions)  # e.g. 7.0
+    # Fallback return rate (used when an account has no per-account rate set)
+    fallback_return_pct = get_return_rate(assumptions)
+
+    # Combine explicit income streams with any auto-synthesized ones from
+    # pension/SS accounts that don't already have a matching income stream.
+    all_income_streams = list(income_streams) + _build_synthetic_income(accounts, income_streams)
 
     base_age = profile.current_age
 
@@ -130,14 +176,20 @@ def run_projection(
         year = BASE_YEAR + (age - base_age)
         is_retired = age >= profile.retirement_age
 
-        # ── Step 1: Grow account balances ────────────────────────────────────
+        # ── Step 1: Grow account balances using per-account return rate ───────
         for account in accounts:
             if not account.include_in_projection:
                 continue
             # Pension and SS are modeled as income streams, not growing portfolios
             if account.account_type in ("pension", "social_security"):
                 continue
-            rate = annual_return_pct / 100.0
+            # Use the account's own expected return; fall back to assumptions rate
+            rate_pct = (
+                account.expected_annual_return_percent
+                if account.expected_annual_return_percent > 0
+                else fallback_return_pct
+            )
+            rate = rate_pct / 100.0
             account_balances[account.id] = account_balances.get(account.id, 0.0) * (1.0 + rate)
 
         # ── Step 2: Contributions (pre-retirement only) ───────────────────────
@@ -157,12 +209,12 @@ def run_projection(
                         account_balances.get(account.id, 0.0) + employee_contrib + employer_match
                     )
 
-        # ── Step 3: Income streams ────────────────────────────────────────────
+        # ── Step 3: Income streams (explicit + auto-synthesized) ─────────────
         pension_income = 0.0
         ss_income = 0.0
         other_income = 0.0
 
-        for stream in income_streams:
+        for stream in all_income_streams:
             if age < stream.start_age:
                 continue
             if stream.end_age is not None and age > stream.end_age:

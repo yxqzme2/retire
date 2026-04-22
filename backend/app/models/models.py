@@ -45,6 +45,7 @@ class Scenario(Base):
     is_base_case = Column(Boolean, default=False)
     status = Column(String(50), default="unknown")  # on_track | borderline | off_track | unknown
     profile_id = Column(Integer, ForeignKey("profiles.id"), nullable=False)
+    last_projected_at = Column(DateTime, nullable=True, default=None)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 

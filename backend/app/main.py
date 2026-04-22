@@ -2,7 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 
-from app.database import create_tables, SessionLocal
+from sqlalchemy import text
+from app.database import create_tables, SessionLocal, engine
 from app.services.seed_data import seed_database
 from app.routers import (
     profiles,
@@ -22,6 +23,14 @@ async def lifespan(app: FastAPI):
     """Application startup/shutdown lifecycle."""
     # Create all tables
     create_tables()
+
+    # Live migration: add any columns introduced after initial deploy
+    with engine.connect() as conn:
+        try:
+            conn.execute(text("ALTER TABLE scenarios ADD COLUMN last_projected_at DATETIME"))
+            conn.commit()
+        except Exception:
+            pass  # Column already exists — safe to ignore
 
     # Seed the database if empty
     db = SessionLocal()

@@ -1,4 +1,4 @@
-import { Copy, Play, Trash2, Pencil, CalendarDays } from 'lucide-react';
+import { Copy, Play, Trash2, Pencil, CalendarDays, Clock, AlertTriangle } from 'lucide-react';
 import { StatusBadge } from '../ui/Badge';
 import Button from '../ui/Button';
 import { formatCurrency } from '../../utils/format';
@@ -51,13 +51,26 @@ export default function ScenarioCard({
         <StatusBadge status={scenario.status} size="sm" />
       </div>
 
-      <div className="flex items-center gap-1.5 text-xs text-slate-600 mb-4">
-        <CalendarDays size={11} />
-        <span>
-          {scenario.updated_at
-            ? `Updated ${new Date(scenario.updated_at).toLocaleDateString()}`
-            : `Created ${new Date(scenario.created_at).toLocaleDateString()}`}
-        </span>
+      <div className="flex flex-col gap-1 mb-4">
+        <div className="flex items-center gap-1.5 text-xs text-slate-600">
+          <CalendarDays size={11} />
+          <span>
+            {scenario.updated_at
+              ? `Updated ${new Date(scenario.updated_at).toLocaleDateString()}`
+              : `Created ${new Date(scenario.created_at).toLocaleDateString()}`}
+          </span>
+        </div>
+        {scenario.last_projected_at ? (
+          <div className="flex items-center gap-1.5 text-xs text-slate-500">
+            <Clock size={11} />
+            <span>Last run {new Date(scenario.last_projected_at).toLocaleString()}</span>
+          </div>
+        ) : (
+          <div className="flex items-center gap-1.5 text-xs text-amber-500/80">
+            <AlertTriangle size={11} />
+            <span>Never run — click Run to generate projections</span>
+          </div>
+        )}
       </div>
 
       <div className="flex items-center gap-2 pt-3 border-t border-slate-700/50">

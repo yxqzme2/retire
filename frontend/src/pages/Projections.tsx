@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Play, Download, ChevronDown, ChevronUp, LineChart } from 'lucide-react';
+import { Play, Download, ChevronDown, ChevronUp, LineChart, RefreshCw } from 'lucide-react';
 import { useActiveScenarioStore } from '../hooks/useScenario';
+import { useScenarios } from '../hooks/useScenario';
 import { useProjection, useRunProjection } from '../hooks/useProjection';
 import BalanceChart from '../components/charts/BalanceChart';
 import IncomeExpenseChart from '../components/charts/IncomeExpenseChart';
@@ -16,12 +17,19 @@ import { getExportUrl } from '../api/import_export';
 
 export default function Projections() {
   const { activeScenarioId } = useActiveScenarioStore();
+  const { data: scenarios = [] } = useScenarios();
   const { results, summary } = useProjection(activeScenarioId);
   const { mutate: runProjection, isPending } = useRunProjection();
   const [showTable, setShowTable] = useState(false);
 
   const retirementAge = summary.data?.retirement_age ?? 60;
   const projectionData = results.data ?? [];
+
+  // Stale-data detection: compare last_projected_at vs scenario updated_at
+  const activeScenario = scenarios.find((s) => s.id === activeScenarioId);
+  const lastRun = activeScenario?.last_projected_at ? new Date(activeScenario.last_projected_at) : null;
+  const lastEdit = activeScenario?.updated_at ? new Date(activeScenario.updated_at) : null;
+  const isStale = projectionData.length > 0 && lastEdit && lastRun && lastEdit > lastRun;
 
   if (!activeScenarioId) {
     return <EmptyState icon={<LineChart size={24} />} title="No scenario selected" description="Select a scenario to view projections." />;
@@ -42,6 +50,22 @@ export default function Projections() {
 
   return (
     <div className="space-y-6">
+      {/* Stale data warning */}
+      {isStale && (
+        <div className="flex items-center justify-between gap-3 bg-amber-500/10 border border-amber-500/30 rounded-xl px-4 py-3">
+          <div className="flex items-center gap-2.5 text-amber-400 text-sm">
+            <RefreshCw size={15} className="flex-shrink-0" />
+            <span>
+              Your data changed after the last projection run ({lastRun!.toLocaleString()}).
+              Re-run to see updated results.
+            </span>
+          </div>
+          <Button variant="primary" size="sm" leftIcon={<Play size={13} />} onClick={() => runProjection(activeScenarioId!)} loading={isPending}>
+            Re-run Now
+          </Button>
+        </div>
+      )}
+
       {/* Actions bar */}
       <div className="flex items-center justify-between">
         <p className="text-slate-500 text-sm">{projectionData.length} years projected</p>

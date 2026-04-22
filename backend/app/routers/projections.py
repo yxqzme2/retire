@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List, Optional
@@ -72,8 +74,9 @@ def run_scenario_projection(scenario_id: int, db: Session = Depends(get_db)):
         )
         db.add(result)
 
-    # Update scenario status
+    # Update scenario status and projection timestamp
     scenario.status = _determine_status(year_results, profile.retirement_age)
+    scenario.last_projected_at = datetime.utcnow()
     db.commit()
 
     # Return summary

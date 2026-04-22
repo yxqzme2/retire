@@ -269,6 +269,7 @@ export interface ScenarioSummary {
   is_base_case: boolean;
   status: ScenarioStatus;
   profile_id: number;
+  last_projected_at: string | null;
   created_at: string;
   updated_at: string | null;
 }
