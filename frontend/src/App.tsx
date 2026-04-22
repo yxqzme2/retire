@@ -13,6 +13,7 @@ import Scenarios from './pages/Scenarios';
 import Projections from './pages/Projections';
 import Import from './pages/Import';
 import Settings from './pages/Settings';
+import Instructions from './pages/Instructions';
 import { getScenarios } from './api/scenarios';
 import { useAppStore } from './store/store';
 
@@ -75,6 +76,7 @@ export default function App() {
             <Route path="/projections" element={<Projections />} />
             <Route path="/import" element={<Import />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/instructions" element={<Instructions />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
         </Routes>

@@ -1,9 +1,11 @@
 import { clsx } from 'clsx';
 import type { InputHTMLAttributes, ReactNode } from 'react';
 import { forwardRef } from 'react';
+import FieldHint from './FieldHint';
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
+  hint?: ReactNode;          // shows a ? tooltip next to the label
   error?: string;
   helper?: string;
   leftAddon?: ReactNode;
@@ -11,7 +13,7 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ label, error, helper, leftAddon, rightAddon, className, id, ...props }, ref) => {
+  ({ label, hint, error, helper, leftAddon, rightAddon, className, id, ...props }, ref) => {
     const inputId = id ?? label?.toLowerCase().replace(/\s+/g, '_');
 
     return (
@@ -19,6 +21,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label htmlFor={inputId} className="text-xs font-medium text-slate-400 uppercase tracking-wider">
             {label}
+            {hint && <FieldHint content={hint} />}
           </label>
         )}
         <div className="relative flex items-center">

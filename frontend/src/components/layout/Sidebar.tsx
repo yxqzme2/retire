@@ -1,7 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard,
-  User,
   Wallet,
   TrendingUp,
   Receipt,
@@ -12,12 +11,14 @@ import {
   FolderInput,
   Settings,
   TrendingUpIcon,
+  BookOpen,
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useScenarios, useActiveScenarioStore } from '../../hooks/useScenario';
 
 const navItems = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
+  { to: '/instructions', label: 'Instructions', icon: BookOpen },
   { to: '/accounts', label: 'Accounts', icon: Wallet },
   { to: '/income', label: 'Income', icon: TrendingUp },
   { to: '/expenses', label: 'Expenses', icon: Receipt },
