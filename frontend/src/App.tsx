@@ -5,6 +5,7 @@ import { useEffect } from 'react';
 import Layout from './components/layout/Layout';
 import Dashboard from './pages/Dashboard';
 import Accounts from './pages/Accounts';
+import NetWorth from './pages/NetWorth';
 import Income from './pages/Income';
 import Expenses from './pages/Expenses';
 import Events from './pages/Events';
@@ -68,6 +69,7 @@ export default function App() {
           <Route element={<Layout />}>
             <Route path="/" element={<Dashboard />} />
             <Route path="/accounts" element={<Accounts />} />
+            <Route path="/networth" element={<NetWorth />} />
             <Route path="/income" element={<Income />} />
             <Route path="/expenses" element={<Expenses />} />
             <Route path="/events" element={<Events />} />
